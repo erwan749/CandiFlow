@@ -12,3 +12,14 @@ export const getApplications = async () => {
         return [];
     }
 };
+
+export const createApplication = async (applicationData) => {
+    try {
+        const response = await axios.post(API_URL, applicationData);
+        return response.data;
+    }
+    catch(error){
+        console.error("Erreur API POST : ", error);
+        throw error;
+    }
+};
