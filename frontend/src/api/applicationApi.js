@@ -23,3 +23,24 @@ export const createApplication = async (applicationData) => {
         throw error;
     }
 };
+
+export const deleteApplication = async(id) => {
+    try{
+        await axios.delete(`${API_URL}/${id}`);
+    }
+    catch(error){
+        console.error("Erreur API : ", error);
+        throw error;
+    }
+};
+
+export const updateApplication = async (id , applicationData) => {
+    try{
+        const response = await axios.put(`${API_URL}/${id}`, applicationData);
+        return response.data;
+    }
+    catch(error){
+        console.error("Erreur API PUT : " , error);
+        throw error
+    }
+};
