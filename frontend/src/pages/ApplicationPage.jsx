@@ -1,40 +1,61 @@
 import { useEffect, useState } from "react";
-import { getApplications, createApplication , deleteApplication , updateApplication } from "../api/applicationApi";
+import {
+  getApplications,
+  createApplication,
+  deleteApplication,
+  updateApplication,
+} from "../api/applicationApi";
 import ApplicationForm from "../components/ApplicationForm";
 import ApplicationList from "../components/ApplicationList";
+import ApplicationFilters from "../components/ApplicationFilters";
 
-// Page principale qui gere le formulaire et la liste
+// Valeur initiale du formulaire
+const initialFormData = {
+  companyName: "",
+  position: "",
+  applicationType: "OFFRE",
+  techStack: "",
+  source: "",
+  sendDate: "",
+  responseDate: "",
+  followUpDate: "",
+  lmLink: "",
+  status: "A_ENVOYER",
+  notes: "",
+};
+
+// Convertit les champs vides en null avant l'envoi au backend
+const formatApplicationForApi = (formData) => ({
+  ...formData,
+  responseDate: formData.responseDate || null,
+  followUpDate: formData.followUpDate || null,
+  lmLink: formData.lmLink || null,
+  techStack: formData.techStack || null,
+  source: formData.source || null,
+  notes: formData.notes || null,
+});
+
+// Page principale qui gère le formulaire et la liste
 function ApplicationsPage() {
-  // Liste des candidatures récupérées depuis le backend
   const [applications, setApplications] = useState([]);
+  const [formData, setFormData] = useState(initialFormData);
   const [submitSuccessKey, setSubmitSuccessKey] = useState(0);
-  const [editingApplicationId , setEditingApplicationId] = useState(null);
-
-  // Etat du formulaire
-  const [formData, setFormData] = useState({
-    companyName: "",
-    position: "",
-    applicationType: "OFFRE",
-    techStack: "",
-    source: "",
-    sendDate: "",
-    responseDate: "",
-    followUpDate: "",
-    lmLink: "",
-    status: "A_ENVOYER",
-    notes: "",
-  });
-
-  // Chargement initial des candidatures
-  useEffect(() => {
-    fetchApplications();
-  }, []);
+  const [editingApplicationId, setEditingApplicationId] = useState(null);
+  const [filterStatus, setFilterStatus] = useState("ALL");
+  const [sortOrder, setSortOrder] = useState("DESC");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchField, setSearchField] = useState("companyName");
 
   // Récupère la liste depuis l'API
   const fetchApplications = async () => {
     const data = await getApplications();
     setApplications(data);
   };
+
+  // Chargement initial des candidatures
+  useEffect(() => {
+    fetchApplications();
+  }, []);
 
   // Met à jour un champ du formulaire
   const handleChange = (event) => {
@@ -46,66 +67,47 @@ function ApplicationsPage() {
     }));
   };
 
+  // Remet le formulaire en mode création
+  const resetForm = () => {
+    setFormData(initialFormData);
+    setEditingApplicationId(null);
+  };
+
   // Envoie le formulaire au backend
-// Envoie le formulaire au backend
-const handleSubmit = async (event) => {
-  event.preventDefault();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
 
-  try {
-    const applicationToSend = {
-      ...formData,
-      responseDate: formData.responseDate || null,
-      followUpDate: formData.followUpDate || null,
-      lmLink: formData.lmLink || null,
-      techStack: formData.techStack || null,
-      source: formData.source || null,
-      notes: formData.notes || null,
-    };
+    try {
+      const applicationToSend = formatApplicationForApi(formData);
 
-    if (editingApplicationId) {
-      // Mode modification
-      await updateApplication(editingApplicationId, applicationToSend);
-      setEditingApplicationId(null);
-    } else {
-      // Mode création
-      await createApplication(applicationToSend);
-    }
+      if (editingApplicationId) {
+        await updateApplication(editingApplicationId, applicationToSend);
+      } else {
+        await createApplication(applicationToSend);
+      }
 
-    await fetchApplications();
-
-    setSubmitSuccessKey((prev) => prev + 1);
-
-    setFormData({
-      companyName: "",
-      position: "",
-      applicationType: "OFFRE",
-      techStack: "",
-      source: "",
-      sendDate: "",
-      responseDate: "",
-      followUpDate: "",
-      lmLink: "",
-      status: "A_ENVOYER",
-      notes: "",
-    });
-  } catch (error) {
-    console.error("Erreur lors de l'enregistrement :", error);
-  }
-};
-
-  //fonction delete
-  const handleDelete = async (id) => {
-    try{
-      await deleteApplication(id);
       await fetchApplications();
-    }
-    catch(error){
-      console.error("Erreur suppresion : ", error);
+      resetForm();
+
+      // Sert à prévenir le formulaire qu'une action a réussi
+      setSubmitSuccessKey((prev) => prev + 1);
+    } catch (error) {
+      console.error("Erreur lors de l'enregistrement :", error);
     }
   };
 
-  //Preparation du formulaire pour modifier une candidature 
-  const handleEdit = (application) =>{
+  // Supprime une candidature
+  const handleDelete = async (id) => {
+    try {
+      await deleteApplication(id);
+      await fetchApplications();
+    } catch (error) {
+      console.error("Erreur suppression :", error);
+    }
+  };
+
+  // Prépare le formulaire pour modifier une candidature
+  const handleEdit = (application) => {
     setEditingApplicationId(application.id);
 
     setFormData({
@@ -120,16 +122,44 @@ const handleSubmit = async (event) => {
       lmLink: application.lmLink || "",
       status: application.status || "A_ENVOYER",
       notes: application.notes || "",
-    })
+    });
   };
 
-  //page 
+// Liste filtrée, recherchée puis triée avant affichage
+const filteredApplications = applications
+  .filter((application) => {
+    if (filterStatus === "ALL") {
+      return true;
+    }
 
-    return (
+    return application.status === filterStatus;
+  })
+  .filter((application) => {
+    if (searchTerm.trim() === "") {
+      return true;
+    }
+
+    const valueToSearch = application[searchField] || "";
+
+    return valueToSearch
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+  })
+  .sort((a, b) => {
+    const dateA = new Date(a.sendDate);
+    const dateB = new Date(b.sendDate);
+
+    if (sortOrder === "ASC") {
+      return dateA - dateB;
+    }
+
+    return dateB - dateA;
+  });
+
+  return (
     <div className="page-container">
       <h1 className="page-title">Mes candidatures</h1>
 
-      {/* Formulaire séparé */}
       <ApplicationForm
         formData={formData}
         onChange={handleChange}
@@ -137,9 +167,23 @@ const handleSubmit = async (event) => {
         submitSuccessKey={submitSuccessKey}
         isEditing={editingApplicationId !== null}
       />
+      
+      <ApplicationFilters
+          filterStatus={filterStatus}
+          onFilterStatusChange={setFilterStatus}
+          sortOrder={sortOrder}
+          onSortOrderChange={setSortOrder}
+          searchTerm={searchTerm}
+          onSearchTermChange={setSearchTerm}
+          searchField={searchField}
+          onSearchFieldChange={setSearchField}
+        />
 
-      {/* Liste séparée */}
-      <ApplicationList applications={applications} onDelete={handleDelete} onEdit={handleEdit} />
+      <ApplicationList
+        applications={filteredApplications}
+        onDelete={handleDelete}
+        onEdit={handleEdit}
+      />
     </div>
   );
 }

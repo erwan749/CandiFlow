@@ -253,3 +253,22 @@ body {
 .application-content {
   flex: 1;
 }
+
+/* Carte des filtres */
+.filters-card {
+  border-top-color: #00688f;
+}
+
+/* Ligne des filtres */
+.filters-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* Mobile plus tard : les filtres passent l’un sous l’autre */
+@media (max-width: 768px) {
+  .filters-row {
+    grid-template-columns: 1fr;
+  }
+}
