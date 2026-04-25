@@ -266,9 +266,71 @@ body {
   gap: 16px;
 }
 
-/* Mobile plus tard : les filtres passent l’un sous l’autre */
+/*les filtres passent l’un sous l’autre */
 @media (max-width: 768px) {
   .filters-row {
     grid-template-columns: 1fr;
   }
+}
+
+/*dashboard css*/
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.dashboard-card {
+  background-color: white;
+  border-radius: 12px;
+  padding: 18px;
+  border-top: 4px solid var(--primary-color);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.dashboard-card span {
+  display: block;
+  color: #6b7280;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.dashboard-card strong {
+  font-size: 30px;
+  color: var(--primary-color);
+}
+
+.dashboard-card.success {
+  border-top-color: #16a34a;
+}
+
+.dashboard-card.success strong {
+  color: #16a34a;
+}
+
+.dashboard-card.danger {
+  border-top-color: #dc2626;
+}
+
+.dashboard-card.danger strong {
+  color: #dc2626;
+}
+
+@media (max-width: 768px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.nav-link {
+  display: inline-block;
+  margin-bottom: 24px;
+  color: var(--primary-color);
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.nav-link:hover {
+  text-decoration: underline;
 }

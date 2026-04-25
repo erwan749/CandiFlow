@@ -159,6 +159,9 @@ const filteredApplications = applications
   return (
     <div className="page-container">
       <h1 className="page-title">Mes candidatures</h1>
+      <a href="/dashboard" className="nav-link">
+        Voir le dashboard
+      </a>
 
       <ApplicationForm
         formData={formData}

@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route} from "react-router-dom";
 import ApplicationPage from "../pages/ApplicationPage";
-import ApplicationsPage from "../pages/ApplicationPage";
+import DashboardPage from "../pages/DashboardPage";
 
 // Composant qui gère les routes de l'application
 function AppRouter(){
@@ -8,7 +8,8 @@ function AppRouter(){
         <BrowserRouter>
             <Routes>
                 {/* Route principale */}
-                <Route path="/" element={<ApplicationsPage />} />
+                <Route path="/" element={<ApplicationPage />} />
+                <Route path="/dashboard" element={<DashboardPage />} />
             </Routes>
         </BrowserRouter>
     )
