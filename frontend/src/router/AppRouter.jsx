@@ -1,11 +1,13 @@
 import { BrowserRouter, Routes, Route} from "react-router-dom";
 import ApplicationPage from "../pages/ApplicationPage";
 import DashboardPage from "../pages/DashboardPage";
+import Navbar from "../components/Navbar";
 
 // Composant qui gère les routes de l'application
 function AppRouter(){
     return(
         <BrowserRouter>
+        <Navbar/>
             <Routes>
                 {/* Route principale */}
                 <Route path="/" element={<ApplicationPage />} />

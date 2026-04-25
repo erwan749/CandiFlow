@@ -18,10 +18,6 @@ function DashboardPage() {
   return (
     <div className="page-container">
       <h1 className="page-title">Dashboard</h1>
-        <a href="/" className="nav-link">
-            Retour aux candidatures
-        </a>
-
       <Dashboard applications={applications} />
     </div>
   );
