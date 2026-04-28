@@ -8,6 +8,7 @@ import {
 import ApplicationForm from "../components/ApplicationForm";
 import ApplicationList from "../components/ApplicationList";
 import ApplicationFilters from "../components/ApplicationFilters";
+import Toast from "../components/Toast";
 
 // Valeur initiale du formulaire
 const initialFormData = {
@@ -45,6 +46,10 @@ function ApplicationsPage() {
   const [sortOrder, setSortOrder] = useState("DESC");
   const [searchTerm, setSearchTerm] = useState("");
   const [searchField, setSearchField] = useState("companyName");
+  const [toast, setToast] = useState({
+    message: "",
+    type: "success",
+  });
 
   // Récupère la liste depuis l'API
   const fetchApplications = async () => {
@@ -82,8 +87,10 @@ function ApplicationsPage() {
 
       if (editingApplicationId) {
         await updateApplication(editingApplicationId, applicationToSend);
+        showToast("Candidature modifiée avec succès");
       } else {
         await createApplication(applicationToSend);
+        showToast("Candidature ajoutée avec succès");
       }
 
       await fetchApplications();
@@ -93,6 +100,7 @@ function ApplicationsPage() {
       setSubmitSuccessKey((prev) => prev + 1);
     } catch (error) {
       console.error("Erreur lors de l'enregistrement :", error);
+      showToast("Erreur lors de l'enregistrement", "error");
     }
   };
 
@@ -101,8 +109,10 @@ function ApplicationsPage() {
     try {
       await deleteApplication(id);
       await fetchApplications();
+      showToast("Candidature supprimée avec succès");
     } catch (error) {
       console.error("Erreur suppression :", error);
+      showToast("Erreur lors de la suppression", "error");
     }
   };
 
@@ -155,9 +165,19 @@ const filteredApplications = applications
 
     return dateB - dateA;
   });
+  // Affiche une notification temporaire
+  const showToast = (message, type = "success") => {
+    setToast({ message, type });
+
+    // Cache le toast après 3 secondes
+    setTimeout(() => {
+      setToast({ message: "", type: "success" });
+    }, 3000);
+  };
 
   return (
     <div className="page-container">
+      <Toast message={toast.message} type={toast.type} />
       <h1 className="page-title">Mes candidatures</h1>
       <ApplicationForm
         formData={formData}
